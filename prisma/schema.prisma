@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+
+  code        String?  @unique // código interno opcional (ej: DRX-2026-001)
+  name        String
+  plant       String
+
+  phase       ProjectPhase @default(IDEA)
+  status      ProjectStatus @default(ACTIVE)
+  priority    Priority @default(MEDIUM)
+
+  ownerName   String?  // MVP sin usuarios aún (luego lo enlazamos a User)
+  description String?
+
+  startDate   DateTime?
+  endDate     DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+enum ProjectPhase {
+  IDEA
+  DESIGN
+  INDUSTRIALIZATION
+  VALIDATION
+  SOP
+  CLOSED
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  BLOCKED
+  DONE
+  CANCELED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+

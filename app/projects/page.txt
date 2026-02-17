@@ -1,0 +1,23 @@
+export default function ProjectsPage() {
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-[#0B3A6E]">Proyectos</h1>
+
+      <div className="bg-white rounded-xl shadow p-5">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <input
+            className="border rounded-lg px-3 py-2 w-full md:w-80"
+            placeholder="Buscar proyecto..."
+          />
+          <button className="bg-[#C8102E] text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
+            Nuevo proyecto
+          </button>
+        </div>
+
+        <div className="mt-6 text-sm text-[#6E6E6E]">
+          (Placeholder) Aquí irá el listado con filtros y exportación CSV.
+        </div>
+      </div>
+    </div>
+  );
+}
