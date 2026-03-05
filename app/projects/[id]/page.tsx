@@ -148,9 +148,10 @@ export default async function ProjectDetailPage({
 
   if (!project) notFound();
 
-  const doneTasks = project.tasks.filter((t) => t.status === "DONE").length;
-  const openRisks = project.risks.filter((r) => r.status === "OPEN").length;
-  const delivered = project.deliverables.filter((d) => d.status === "DELIVERED").length;
+  const doneTasks = project.tasks.filter((t: { status: string }) => t.status === "DONE").length;
+const openRisks = project.risks.filter((r: { status: string }) => r.status === "OPEN").length;
+const delivered = project.deliverables.filter((d: { status: string }) => d.status === "DELIVERED").length;
+
 
   const tasks = project.tasks.map((task) => ({
     id: task.id,
