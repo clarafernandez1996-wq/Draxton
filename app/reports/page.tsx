@@ -193,7 +193,7 @@ export default async function ReportsPage() {
                 {groupedByStatus.map((row) => (
                   <tr key={row.status}>
                     <td className="px-4 py-2">{STATUS_LABELS[row.status] ?? row.status}</td>
-                    <td className="px-4 py-2">{row._count.status}</td>
+                    <td className="px-4 py-2">{row._count?.status ?? 0}</td>
                   </tr>
                 ))}
               </tbody>
@@ -215,7 +215,7 @@ export default async function ReportsPage() {
                 {groupedByPhase.map((row) => (
                   <tr key={row.phase}>
                     <td className="px-4 py-2">{PHASE_LABELS[row.phase] ?? row.phase}</td>
-                    <td className="px-4 py-2">{row._count.phase}</td>
+                    <td className="px-4 py-2">{row._count?.phase ?? 0}</td>
                   </tr>
                 ))}
               </tbody>
@@ -237,7 +237,7 @@ export default async function ReportsPage() {
                 {groupedByPriority.map((row) => (
                   <tr key={row.priority}>
                     <td className="px-4 py-2">{PRIORITY_LABELS[row.priority] ?? row.priority}</td>
-                    <td className="px-4 py-2">{row._count.priority}</td>
+                    <td className="px-4 py-2">{row._count?.priority ?? 0}</td>
                   </tr>
                 ))}
               </tbody>
@@ -259,7 +259,7 @@ export default async function ReportsPage() {
                 {groupedByType.map((row) => (
                   <tr key={row.projectType}>
                     <td className="px-4 py-2">{TYPE_LABELS[row.projectType] ?? row.projectType}</td>
-                    <td className="px-4 py-2">{row._count.projectType}</td>
+                    <td className="px-4 py-2">{row._count?.projectType ?? 0}</td>
                   </tr>
                 ))}
               </tbody>
@@ -270,5 +270,6 @@ export default async function ReportsPage() {
     </div>
   );
 }
+
 
 
