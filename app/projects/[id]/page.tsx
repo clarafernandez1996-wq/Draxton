@@ -309,7 +309,7 @@ type ProjectTask = (typeof project.tasks)[number];
       {selectedTab === "deliverables" ? (
         <DeliverablesPanel
           projectId={project.id}
-          tasks={project.tasks.map((task) => ({
+          tasks={project.tasks.map((task: ProjectTask) => ({
             id: task.id,
             title: task.title,
           }))}
