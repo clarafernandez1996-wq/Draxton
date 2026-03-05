@@ -152,8 +152,10 @@ export default async function ProjectDetailPage({
 const openRisks = project.risks.filter((r: { status: string }) => r.status === "OPEN").length;
 const delivered = project.deliverables.filter((d: { status: string }) => d.status === "DELIVERED").length;
 
+type ProjectTask = (typeof project.tasks)[number];
 
-  const tasks = project.tasks.map((task) => ({
+  const tasks = project.tasks.map((task: ProjectTask) => ({
+
     id: task.id,
     title: task.title,
     ownerName: task.ownerName,
