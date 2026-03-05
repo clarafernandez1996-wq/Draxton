@@ -100,18 +100,22 @@ export default async function ReportsPage() {
     }),
     prisma.project.groupBy({
       by: ["status"],
+      orderBy: { status: "asc" },
       _count: { status: true },
     }),
     prisma.project.groupBy({
       by: ["phase"],
+      orderBy: { phase: "asc" },
       _count: { phase: true },
     }),
     prisma.project.groupBy({
       by: ["priority"],
+      orderBy: { priority: "asc" },
       _count: { priority: true },
     }),
     prisma.project.groupBy({
       by: ["projectType"],
+      orderBy: { projectType: "asc" },
       _count: { projectType: true },
     }),
   ]);
@@ -266,3 +270,5 @@ export default async function ReportsPage() {
     </div>
   );
 }
+
+
