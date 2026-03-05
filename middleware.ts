@@ -51,6 +51,12 @@ async function verifyToken(token: string): Promise<SessionPayload | null> {
 }
 
 export async function middleware(request: NextRequest) {
+  // Temporary bypass: authentication disabled by default.
+  // Set DISABLE_AUTH=0 when you want to enforce login again.
+  if (process.env.DISABLE_AUTH !== "0") {
+    return NextResponse.next();
+  }
+
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(SESSION_COOKIE)?.value;
 
