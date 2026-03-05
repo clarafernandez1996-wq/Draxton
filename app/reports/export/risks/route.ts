@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../../../lib/prisma";
+import { prisma } from "../../../lib/prisma";
 
 function escapeCsv(value: unknown): string {
   const text = String(value ?? "");
