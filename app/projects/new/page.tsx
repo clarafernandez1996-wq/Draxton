@@ -1,103 +1,107 @@
-import { prisma } from "../../lib/prisma";
-import { redirect } from "next/navigation";
+import Link from "next/link";
+import { createProjectAction } from "../actions";
 
-async function createProject(formData: FormData) {
-  "use server";
-
-  const name = String(formData.get("name") ?? "").trim();
-  const plant = String(formData.get("plant") ?? "").trim();
-
-  if (!name || !plant) {
-    // MVP: en vez de gestionar errores complejos, redirigimos
-    redirect("/projects?error=missing");
-  }
-
-  const phase = String(formData.get("phase") ?? "IDEA");
-  const status = String(formData.get("status") ?? "ACTIVE");
-  const priority = String(formData.get("priority") ?? "MEDIUM");
-  const ownerName = String(formData.get("ownerName") ?? "").trim();
-  const description = String(formData.get("description") ?? "").trim();
-
-  await prisma.project.create({
-  data: {
-    name,
-    plant,
-  },
-});
-
-  redirect("/projects");
+function readParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
 }
 
-export default function NewProjectPage() {
+function errorText(code: string) {
+  if (code === "required") return "Nombre del proyecto e ID del proyecto son obligatorios.";
+  if (code === "project_code_taken") return "El ID del proyecto ya existe. Usa otro valor.";
+  if (code === "create_failed") return "No se pudo crear el proyecto.";
+  return "";
+}
+
+export default async function NewProjectPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const error = errorText(readParam(params.error));
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-[#0B3A6E]">Nuevo proyecto</h1>
 
-      <form action={createProject} className="bg-white rounded-xl shadow p-5 space-y-4 max-w-2xl">
+      {error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+      ) : null}
+
+      <form action={createProjectAction} className="max-w-4xl space-y-5 rounded-xl bg-white p-5 shadow">
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-1">
-            <div className="text-sm font-medium">Nombre *</div>
-            <input name="name" className="w-full border rounded-lg px-3 py-2" placeholder="Ej: Nuevo utillaje línea X" />
+            <div className="text-sm font-medium">Nombre del proyecto *</div>
+            <input name="name" className="w-full rounded-lg border px-3 py-2" placeholder="Ej: Migraci�n ERP" required />
           </label>
 
           <label className="space-y-1">
-            <div className="text-sm font-medium">Planta *</div>
-            <input name="plant" className="w-full border rounded-lg px-3 py-2" placeholder="Ej: Toledo / Valladolid / ..." />
+            <div className="text-sm font-medium">ID del proyecto *</div>
+            <input
+              name="projectCode"
+              className="w-full rounded-lg border px-3 py-2"
+              placeholder="Ej: PRJ-2026-001"
+              required
+            />
           </label>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           <label className="space-y-1">
-            <div className="text-sm font-medium">Fase</div>
-            <select name="phase" className="w-full border rounded-lg px-3 py-2">
-              <option value="IDEA">Idea</option>
-              <option value="DESIGN">Design</option>
-              <option value="INDUSTRIALIZATION">Industrialization</option>
-              <option value="VALIDATION">Validation</option>
-              <option value="SOP">SOP</option>
-              <option value="CLOSED">Closed</option>
+            <div className="text-sm font-medium">Tipo</div>
+            <select name="projectType" className="w-full rounded-lg border px-3 py-2">
+              <option value="STRATEGIC">Estrat�gico</option>
+              <option value="TACTICAL">T�ctico</option>
+              <option value="OPERATIONAL">Operativo</option>
             </select>
           </label>
 
           <label className="space-y-1">
-            <div className="text-sm font-medium">Estado</div>
-            <select name="status" className="w-full border rounded-lg px-3 py-2">
-              <option value="ACTIVE">Active</option>
-              <option value="ON_HOLD">On hold</option>
-              <option value="BLOCKED">Blocked</option>
-              <option value="DONE">Done</option>
-              <option value="CANCELED">Canceled</option>
+            <div className="text-sm font-medium">�rea</div>
+            <select name="area" className="w-full rounded-lg border px-3 py-2">
+              <option value="IT">IT</option>
+              <option value="RRHH">RRHH</option>
+              <option value="INGENIERIA">Ingenier�a</option>
             </select>
           </label>
 
           <label className="space-y-1">
-            <div className="text-sm font-medium">Prioridad</div>
-            <select name="priority" className="w-full border rounded-lg px-3 py-2">
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="CRITICAL">Critical</option>
-            </select>
+            <div className="text-sm font-medium">Responsable</div>
+            <input name="ownerName" className="w-full rounded-lg border px-3 py-2" placeholder="Nombre Apellido" />
           </label>
         </div>
 
         <label className="space-y-1">
-          <div className="text-sm font-medium">Responsable (owner)</div>
-          <input name="ownerName" className="w-full border rounded-lg px-3 py-2" placeholder="Ej: Nombre Apellido" />
+          <div className="text-sm font-medium">Descripci�n del proyecto</div>
+          <textarea name="description" className="w-full rounded-lg border px-3 py-2" rows={3} />
         </label>
 
         <label className="space-y-1">
-          <div className="text-sm font-medium">Descripción</div>
-          <textarea name="description" className="w-full border rounded-lg px-3 py-2" rows={4} placeholder="Contexto, objetivo, notas..." />
+          <div className="text-sm font-medium">Caso de negocio</div>
+          <textarea name="businessCase" className="w-full rounded-lg border px-3 py-2" rows={3} />
         </label>
 
+        <label className="space-y-1">
+          <div className="text-sm font-medium">Objetivos principales</div>
+          <textarea name="mainObjectives" className="w-full rounded-lg border px-3 py-2" rows={3} />
+        </label>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="space-y-1">
+            <div className="text-sm font-medium">Fecha de inicio</div>
+            <input name="startDate" type="date" className="w-full rounded-lg border px-3 py-2" />
+          </label>
+          <label className="space-y-1">
+            <div className="text-sm font-medium">Fecha de fin</div>
+            <input name="endDate" type="date" className="w-full rounded-lg border px-3 py-2" />
+          </label>
+        </div>
+
         <div className="flex gap-3">
-          <button className="bg-[#C8102E] text-white px-5 py-2 rounded-lg hover:opacity-90 transition">
-            Crear proyecto
-          </button>
-          <a href="/projects" className="px-5 py-2 rounded-lg border">
+          <button className="rounded-lg bg-[#C8102E] px-5 py-2 text-white transition hover:opacity-90">Crear proyecto</button>
+          <Link href="/projects" className="rounded-lg border px-5 py-2">
             Cancelar
-          </a>
+          </Link>
         </div>
       </form>
     </div>

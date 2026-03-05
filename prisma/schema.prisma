@@ -10,30 +10,226 @@ datasource db {
 model Project {
   id          String   @id @default(uuid())
 
-  code        String?  @unique // código interno opcional (ej: DRX-2026-001)
+  code        String?  @unique // codigo interno opcional (ej: DRX-2026-001)
+  projectCode String?  @unique
   name        String
   plant       String
+  area        Area     @default(IT)
+  projectType ProjectType @default(OPERATIVO)
 
-  phase       ProjectPhase @default(IDEA)
+  phase       ProjectPhase @default(DEFINICION)
   status      ProjectStatus @default(ACTIVE)
   priority    Priority @default(MEDIUM)
 
-  ownerName   String?  // MVP sin usuarios aún (luego lo enlazamos a User)
+  ownerName   String?  // MVP sin usuarios aÃºn (luego lo enlazamos a User)
   description String?
+  objective   String?
+  scope       String?
+  sponsorName String?
+  assumptions String?
+  constraints String?
 
-  startDate   DateTime?
-  endDate     DateTime?
+  startDate        DateTime?
+  endDate          DateTime?
+  plannedStartDate DateTime?
+  plannedEndDate   DateTime?
+  tasks       Task[]
+  risks       Risk[]
+  deliverables Deliverable[]
+  monthlySnapshots ProjectMonthlySnapshot[]
+  financeEntries ProjectFinanceEntry[]
+  financeSummary ProjectFinanceSummary?
+  deliverableItems ProjectDeliverableItem[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model ProjectMonthlySnapshot {
+  id               String   @id @default(uuid())
+  projectId        String
+  period           String
+  scheduleRag      RagLevel
+  costRag          RagLevel
+  scopeRag         RagLevel
+  riskRag          RagLevel
+  supplierRag      RagLevel
+  executiveComment String?
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([projectId, period])
+  @@index([projectId, period])
+}
+
+model ProjectFinanceSummary {
+  id               String   @id @default(uuid())
+  projectId        String   @unique
+  budgetApproved   Float    @default(0)
+  actualCost       Float    @default(0)
+  committedCost    Float    @default(0)
+  economicRiskNote String?
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ProjectFinanceEntry {
+  id            String   @id @default(uuid())
+  projectId     String
+  type          String
+  category      String
+  description   String?
+  supplier      String?
+  ownerName     String?
+  leverage      String?
+  budgetAmount  Float    @default(0)
+  actualAmount  Float    @default(0)
+  probability   Int?
+  weightedAmount Float?
+  capex         Float?
+  opexAnnual    Float?
+  paybackYears  Float?
+  roiPercent    Float?
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([type])
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(USER)
+  sessions     Session[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  dueDate     DateTime?
+  ownerName   String?
+  phase       String?
+  deliverableCode String?
+  deliverableIds String?
+  plannedStart DateTime?
+  plannedEnd   DateTime?
+  actualStart  DateTime?
+  actualEnd    DateTime?
+  progressPlanned Int    @default(0)
+  progressActual Int     @default(0)
+  startPlanned DateTime?
+  endPlanned   DateTime?
+  startReal    DateTime?
+  endReal      DateTime?
+  progressReal Int       @default(0)
+  progress    Float      @default(0)
+  comments    String?
+  priority    Priority   @default(MEDIUM)
+  status      TaskStatus @default(NOT_STARTED)
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  deliverableItems ProjectDeliverableItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([projectId])
+}
+
+model Risk {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  ownerName   String?
+  mitigationPlan String?
+  targetDate  DateTime?
+  status      RiskStatus @default(OPEN)
+  probability Int        @default(3)
+  impact      Int        @default(3)
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+  @@index([probability, impact])
+}
+
+model Deliverable {
+  id             String            @id @default(uuid())
+  title          String
+  status         DeliverableStatus @default(NOT_STARTED)
+  description    String?
+  sharepointLink String?
+  committedDate  DateTime?
+  expectedDate   DateTime?
+  raciA          RaciRole          @default(I)
+  raciB          RaciRole          @default(I)
+  raciC          RaciRole          @default(I)
+  raciD          RaciRole          @default(I)
+  projectId      String
+  project        Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model ProjectDeliverableItem {
+  id             String            @id @default(uuid())
+  projectId      String
+  taskId         String?
+  name           String
+  status         DeliverableStatus @default(NOT_STARTED)
+  committedDate  DateTime?
+  ownerName      String?
+  sharepointLink String?
+  project        Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task           Task?             @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([projectId])
+  @@index([taskId])
+  @@index([status])
+}
 enum ProjectPhase {
-  IDEA
-  DESIGN
-  INDUSTRIALIZATION
-  VALIDATION
-  SOP
-  CLOSED
+  DEFINICION
+  EJECUCION
+  IMPLANTACION
+  ESTABILIZACION
+}
+
+enum ProjectType {
+  ESTRATEGICO
+  TACTICO
+  OPERATIVO
+}
+
+enum Area {
+  IT
+  RRHH
+  INGENIERIA
 }
 
 enum ProjectStatus {
@@ -50,4 +246,45 @@ enum Priority {
   HIGH
   CRITICAL
 }
+
+enum TaskStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  DONE
+  BLOCKED
+  TODO
+}
+
+enum RiskStatus {
+  OPEN
+  CLOSED
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum DeliverableStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  IN_REVIEW
+  DELIVERED
+}
+
+enum RaciRole {
+  R
+  A
+  C
+  I
+}
+
+enum RagLevel {
+  GREEN
+  YELLOW
+  RED
+  NA
+}
+
+
 

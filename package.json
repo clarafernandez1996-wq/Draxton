@@ -6,10 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate": "prisma db push",
+    "migrate:deploy": "prisma migrate deploy",
+    "seed": "prisma db seed",
+    "create-admin": "node scripts/create-admin.mjs",
+    "import:flight-projects": "node scripts/import-flight-projects.mjs"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
+    "bcryptjs": "^2.4.3",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

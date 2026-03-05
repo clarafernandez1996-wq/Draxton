@@ -5,6 +5,12 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
+const dbUrl = process.env.DATABASE_URL?.trim();
+if (!dbUrl || (!dbUrl.startsWith("file:") && !dbUrl.startsWith("file://"))) {
+  process.env.DATABASE_URL = "file:./prisma/dev.db";
+}
+process.env.PRISMA_CLIENT_ENGINE_TYPE = "binary";
+
 export const prisma =
   global.prisma ??
   new PrismaClient({

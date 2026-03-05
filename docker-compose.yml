@@ -1,0 +1,61 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: draxton-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-draxton}
+      POSTGRES_USER: ${POSTGRES_USER:-draxton}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-draxton}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-draxton} -d ${POSTGRES_DB:-draxton}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      target: dev
+    container_name: draxton-app-dev
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-draxton}:${POSTGRES_PASSWORD:-draxton}@db:5432/${POSTGRES_DB:-draxton}?schema=public
+    command: sh -c "npm run migrate && npm run dev"
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+  app-prod:
+    build:
+      context: .
+      target: runner
+    container_name: draxton-app-prod
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-draxton}:${POSTGRES_PASSWORD:-draxton}@db:5432/${POSTGRES_DB:-draxton}?schema=public
+    command: sh -c "npm run migrate && npm run start"
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    profiles:
+      - prod
+
+volumes:
+  postgres_data:
