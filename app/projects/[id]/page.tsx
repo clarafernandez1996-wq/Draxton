@@ -153,6 +153,7 @@ const openRisks = project.risks.filter((r: { status: string }) => r.status === "
 const delivered = project.deliverables.filter((d: { status: string }) => d.status === "DELIVERED").length;
 
 type ProjectTask = (typeof project.tasks)[number];
+type ProjectDeliverableItem = (typeof project.deliverableItems)[number];
 
   const tasks = project.tasks.map((task: ProjectTask) => ({
 
@@ -313,8 +314,9 @@ type ProjectTask = (typeof project.tasks)[number];
             id: task.id,
             title: task.title,
           }))}
-          deliverables={project.deliverableItems.map((item) => {
-            const linkedTask = project.tasks.find((task) => task.id === item.taskId);
+          deliverables={project.deliverableItems.map((item: ProjectDeliverableItem) => {
+          const linkedTask = project.tasks.find((task: ProjectTask) => task.id === item.taskId);
+
             return {
               id: item.id,
               name: item.name,
