@@ -154,6 +154,9 @@ const delivered = project.deliverables.filter((d: { status: string }) => d.statu
 
 type ProjectTask = (typeof project.tasks)[number];
 type ProjectDeliverableItem = (typeof project.deliverableItems)[number];
+type ProjectRisk = (typeof project.risks)[number];
+type ProjectFinanceEntry = (typeof project.financeEntries)[number];
+type ProjectMonthlySnapshot = (typeof project.monthlySnapshots)[number];
 
   const tasks = project.tasks.map((task: ProjectTask) => ({
 
@@ -334,7 +337,7 @@ type ProjectDeliverableItem = (typeof project.deliverableItems)[number];
       {selectedTab === "risks" ? (
         <RiskPanel
           projectId={project.id}
-          risks={project.risks.map((risk) => ({
+          risks={project.risks.map((risk: ProjectRisk) => ({
             id: risk.id,
             title: risk.title,
             status: risk.status,
@@ -355,7 +358,7 @@ type ProjectDeliverableItem = (typeof project.deliverableItems)[number];
             committedCost: project.financeSummary?.committedCost ?? 0,
             economicRiskNote: project.financeSummary?.economicRiskNote ?? null,
           }}
-          entries={project.financeEntries.map((entry) => ({
+          entries={project.financeEntries.map((entry: ProjectFinanceEntry) => ({
             id: entry.id,
             type: (entry.type === "INCOME" || entry.type === "BENEFIT" ? entry.type : "COST"),
             category: entry.category,
@@ -395,7 +398,7 @@ type ProjectDeliverableItem = (typeof project.deliverableItems)[number];
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {project.monthlySnapshots.map((snap) => (
+                  {project.monthlySnapshots.map((snap: ProjectMonthlySnapshot) => (
                     <tr key={snap.id}>
                       <td className="px-3 py-2">{snap.period}</td>
                       <td className="px-3 py-2">{snap.scheduleRag}</td>
@@ -447,3 +450,4 @@ type ProjectDeliverableItem = (typeof project.deliverableItems)[number];
     </div>
   );
 }
+
