@@ -12,12 +12,16 @@ function normalizeDatabaseUrl(value: string | undefined) {
   return trimmed.replace(/^"(.*)"$/, "$1").replace(/^'(.*)'$/, "$1");
 }
 
+function isPostgresUrl(value: string) {
+  return value.startsWith("postgresql://") || value.startsWith("postgres://");
+}
+
 const databaseUrl = normalizeDatabaseUrl(process.env.DATABASE_URL);
 const directUrl = normalizeDatabaseUrl(process.env.DATABASE_URL_UNPOOLED);
 
-if (databaseUrl) {
+if (isPostgresUrl(databaseUrl)) {
   process.env.DATABASE_URL = databaseUrl;
-} else if (directUrl) {
+} else if (isPostgresUrl(directUrl)) {
   process.env.DATABASE_URL = directUrl;
 }
 
