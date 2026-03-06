@@ -5,10 +5,22 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const dbUrl = process.env.DATABASE_URL?.trim();
-if (!dbUrl || (!dbUrl.startsWith("file:") && !dbUrl.startsWith("file://"))) {
-  process.env.DATABASE_URL = "file:./prisma/dev.db";
+function normalizeDatabaseUrl(value: string | undefined) {
+  if (!value) return "";
+
+  const trimmed = value.trim();
+  return trimmed.replace(/^"(.*)"$/, "$1").replace(/^'(.*)'$/, "$1");
 }
+
+const databaseUrl = normalizeDatabaseUrl(process.env.DATABASE_URL);
+const directUrl = normalizeDatabaseUrl(process.env.DATABASE_URL_UNPOOLED);
+
+if (databaseUrl) {
+  process.env.DATABASE_URL = databaseUrl;
+} else if (directUrl) {
+  process.env.DATABASE_URL = directUrl;
+}
+
 process.env.PRISMA_CLIENT_ENGINE_TYPE = "binary";
 
 export const prisma =
